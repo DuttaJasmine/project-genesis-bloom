@@ -32,14 +32,15 @@ const BudgetAnalysisPage = () => {
     
     // Assign costs between 1000 and 5000
     return programs.reduce((acc, program, index) => {
+      // Fix: Use numerical value for modulo operation
       acc[program] = 1000 + (index * 1000) % 4001; // Range from 1000 to 5000
       return acc;
-    }, {});
+    }, {} as Record<string, number>); // Add type annotation to acc
   }, [casesWithEvents]);
   
   // Calculate current budget allocation
   const currentBudget = React.useMemo(() => {
-    const programCounts = {};
+    const programCounts: Record<string, number> = {};
     let totalParticipants = 0;
     
     casesWithEvents.forEach(caseData => {
@@ -82,7 +83,7 @@ const BudgetAnalysisPage = () => {
     const newTotalBudget = currentBudget.totalBudget * (1 - budgetCutPercentage / 100);
     
     // Get success rates by program
-    const programSuccessRates = {};
+    const programSuccessRates: Record<string, { success: number; total: number }> = {};
     casesWithEvents.forEach(caseData => {
       const program = caseData.training_program;
       if (!program) return;

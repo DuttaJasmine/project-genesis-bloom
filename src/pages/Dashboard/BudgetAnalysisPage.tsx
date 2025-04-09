@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -220,7 +219,7 @@ const BudgetAnalysisPage = () => {
               <div className="p-4 bg-white rounded-lg shadow">
                 <h3 className="text-sm font-medium text-gray-500">Reduction</h3>
                 <p className="text-2xl font-bold text-amber-600">
-                  £{(currentBudget.totalBudget - optimizedBudget.newTotalBudget)?.toLocaleString()}
+                  £{(currentBudget.totalBudget - (optimizedBudget.newTotalBudget || 0))?.toLocaleString()}
                 </p>
               </div>
             </div>

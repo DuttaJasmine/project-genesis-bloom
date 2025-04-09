@@ -85,7 +85,15 @@ export type Database = {
           skill_category?: string | null
           timestamp?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "WorkforceReskilling_events_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "WorkforceReskilling_Caes"
+            referencedColumns: ["case_id"]
+          },
+        ]
       }
     }
     Views: {

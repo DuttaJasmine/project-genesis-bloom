@@ -6,10 +6,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from "recharts";
 import { fetchAutomationRiskData } from "@/services/supabaseService";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 const AutomationRiskPage = () => {
-  const { data: occupations = [], isLoading } = useQuery({
+  const { toast } = useToast();
+  
+  const { 
+    data: occupations = [], 
+    isLoading,
+    refetch 
+  } = useQuery({
     queryKey: ["automationRisk"],
     queryFn: fetchAutomationRiskData,
   });
@@ -28,6 +36,29 @@ const AutomationRiskPage = () => {
       .sort((a, b) => b.risk - a.risk)
       .slice(0, 10);
   }, [occupations]);
+
+  const handleRefresh = async () => {
+    try {
+      toast({
+        title: "Refreshing data...",
+        description: "Fetching the latest automation risk data"
+      });
+      
+      await refetch();
+      
+      toast({
+        title: "Data refreshed",
+        description: "Risk dashboard now shows the latest data"
+      });
+    } catch (error) {
+      console.error("Error refreshing automation risk data:", error);
+      toast({
+        title: "Refresh failed",
+        description: "There was an error refreshing the data",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (isLoading) {
     return <div className="flex justify-center items-center h-full">Loading risk data...</div>;
@@ -56,9 +87,22 @@ const AutomationRiskPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <AlertTriangle className="h-6 w-6 text-red-500" />
-        <h1 className="text-2xl font-bold">Roles at High Risk of Automation</h1>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-6 w-6 text-red-500" />
+          <h1 className="text-2xl font-bold">Roles at High Risk of Automation</h1>
+        </div>
+        
+        <Button 
+          onClick={handleRefresh} 
+          variant="outline"
+          size="sm"
+          disabled={isLoading}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Refresh Data
+        </Button>
       </div>
       
       <Card>

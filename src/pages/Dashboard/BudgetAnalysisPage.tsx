@@ -66,7 +66,6 @@ const BudgetAnalysisPage = () => {
       toast({
         title: "Data refreshed",
         description: "Dashboard now shows the latest data",
-        variant: "success",
       });
     } catch (error) {
       console.error("Error refreshing data:", error);

@@ -22,6 +22,10 @@ const BudgetAnalysisPage = () => {
   } = useQuery({
     queryKey: ["trainingWithEvents"],
     queryFn: fetchCasesWithEvents,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity
   });
   
   const { 
@@ -31,6 +35,10 @@ const BudgetAnalysisPage = () => {
   } = useQuery({
     queryKey: ["automationRisk"],
     queryFn: fetchAutomationRiskData,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity
   });
   
   const { currentBudget, optimizedBudget, budgetComparisonData } = useBudgetCalculations({

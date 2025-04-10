@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,12 +5,24 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 import { fetchCasesWithEvents } from "@/services/supabaseService";
-import { LineChart as LineChartIcon, TrendingUp } from "lucide-react";
+import { LineChart as LineChartIcon, TrendingUp, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 const ReskillingSuccessPage = () => {
-  const { data: casesWithEvents = [], isLoading } = useQuery({
+  const { toast } = useToast();
+  
+  const { 
+    data: casesWithEvents = [], 
+    isLoading,
+    refetch 
+  } = useQuery({
     queryKey: ["trainingWithEvents"],
     queryFn: fetchCasesWithEvents,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity
   });
 
   const skillCategoryStats = React.useMemo(() => {
@@ -19,7 +30,6 @@ const ReskillingSuccessPage = () => {
     
     const skillMap = new Map();
     
-    // Extract all unique skill categories
     casesWithEvents.forEach(caseData => {
       if (!caseData.events) return;
       
@@ -45,7 +55,6 @@ const ReskillingSuccessPage = () => {
         if (event.completion_status === "passed") stats.passed++;
         if (event.completion_status === "failed") stats.failed++;
         
-        // Parse score if available
         if (event.score) {
           let score = parseFloat(event.score);
           if (!isNaN(score)) {
@@ -55,7 +64,6 @@ const ReskillingSuccessPage = () => {
       });
     });
     
-    // Calculate average scores and success rates
     return Array.from(skillMap.values()).map(skill => ({
       ...skill,
       avgScore: skill.scores.length ? 
@@ -65,7 +73,6 @@ const ReskillingSuccessPage = () => {
     })).sort((a, b) => b.successRate - a.successRate);
   }, [casesWithEvents]);
 
-  // Calculate prediction factors based on patterns in the data
   const predictionFactors = React.useMemo(() => {
     if (!casesWithEvents.length) return [];
     
@@ -92,7 +99,6 @@ const ReskillingSuccessPage = () => {
       }
     });
     
-    // Calculate success rates by program
     return Object.keys(programSuccessRates).map(program => ({
       factor: program,
       successRate: programSuccessRates[program].total > 0 ? 
@@ -101,6 +107,29 @@ const ReskillingSuccessPage = () => {
         (certificationCountsByProgram[program].certified / certificationCountsByProgram[program].total) * 100 : 0
     })).sort((a, b) => b.successRate - a.successRate);
   }, [casesWithEvents]);
+
+  const handleRefresh = async () => {
+    try {
+      toast({
+        title: "Refreshing data...",
+        description: "Fetching the latest reskilling data"
+      });
+      
+      await refetch();
+      
+      toast({
+        title: "Data refreshed",
+        description: "Reskilling dashboard now shows the latest data"
+      });
+    } catch (error) {
+      console.error("Error refreshing reskilling data:", error);
+      toast({
+        title: "Refresh failed",
+        description: "There was an error refreshing the data",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (isLoading) {
     return <div className="flex justify-center items-center h-full">Loading reskilling data...</div>;
@@ -119,9 +148,22 @@ const ReskillingSuccessPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <TrendingUp className="h-6 w-6 text-green-500" />
-        <h1 className="text-2xl font-bold">Predict Reskilling Success</h1>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-6 w-6 text-green-500" />
+          <h1 className="text-2xl font-bold">Predict Reskilling Success</h1>
+        </div>
+        
+        <Button 
+          onClick={handleRefresh} 
+          variant="outline"
+          size="sm"
+          disabled={isLoading}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Refresh Data
+        </Button>
       </div>
       
       <Card>

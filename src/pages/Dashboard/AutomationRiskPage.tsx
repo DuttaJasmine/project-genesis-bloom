@@ -20,6 +20,10 @@ const AutomationRiskPage = () => {
   } = useQuery({
     queryKey: ["automationRisk"],
     queryFn: fetchAutomationRiskData,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity
   });
 
   // Format for chart and get top 10

@@ -4,9 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 // Fetch occupations with automation risk
 export async function fetchAutomationRiskData() {
   const { data, error } = await supabase
-    .from("Occupation")
+    .from("Job_Risk")
     .select("*")
-    .order("Probability of automation", { ascending: false });
+    .order("automation_probability", { ascending: false });
   
   if (error) {
     console.error("Error fetching automation risk data:", error);
@@ -19,7 +19,7 @@ export async function fetchAutomationRiskData() {
 // Fetch training cases
 export async function fetchTrainingCases() {
   const { data, error } = await supabase
-    .from("WorkforceReskilling_Caes")
+    .from("Employee_Reskilling_cases_with_trainning_effectiveness")
     .select("*");
   
   if (error) {

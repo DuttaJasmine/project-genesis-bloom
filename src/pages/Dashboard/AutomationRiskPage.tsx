@@ -31,11 +31,11 @@ const AutomationRiskPage = () => {
     if (!occupations.length) return [];
     
     return occupations
-      .filter(occ => occ["Probability of automation"]) // Filter out nulls
+      .filter(occ => occ.automation_probability) // Filter out nulls
       .map(occ => ({
-        name: occ.occupation_name || `Occupation ${occ.occupation_id}`,
-        risk: parseFloat(occ["Probability of automation"] || "0"),
-        id: occ.occupation_id,
+        name: occ.job_title || `Occupation ${occ.soc_code}`,
+        risk: parseFloat(occ.automation_probability || "0") * 100, // Convert to percentage
+        id: occ.soc_code,
       }))
       .sort((a, b) => b.risk - a.risk)
       .slice(0, 10);
@@ -167,16 +167,16 @@ const AutomationRiskPage = () => {
             </TableHeader>
             <TableBody>
               {occupations.slice(0, 20).map((occ) => {
-                const riskScore = parseFloat(occ["Probability of automation"] || "0");
+                const riskScore = parseFloat(occ.automation_probability || "0") * 100; // Convert to percentage
                 let riskLevel = "Low";
                 if (riskScore > 70) riskLevel = "High";
                 else if (riskScore > 40) riskLevel = "Medium";
                 
                 return (
-                  <TableRow key={occ.occupation_id}>
-                    <TableCell>{occ.occupation_id}</TableCell>
-                    <TableCell>{occ.occupation_name || "Unknown"}</TableCell>
-                    <TableCell>{occ["Probability of automation"] || "N/A"}</TableCell>
+                  <TableRow key={occ.soc_code}>
+                    <TableCell>{occ.soc_code}</TableCell>
+                    <TableCell>{occ.job_title || "Unknown"}</TableCell>
+                    <TableCell>{(occ.automation_probability ? (occ.automation_probability * 100).toFixed(1) : "N/A") + "%"}</TableCell>
                     <TableCell>
                       <span 
                         className={`px-2 py-1 rounded-full text-xs font-medium ${

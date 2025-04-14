@@ -9,31 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      Occupation: {
+      Employee_Profile: {
         Row: {
-          occupation_id: number
-          occupation_name: string | null
-          "Probability of automation": string | null
+          employee_id: number
+          soc_code: number | null
         }
         Insert: {
-          occupation_id: number
-          occupation_name?: string | null
-          "Probability of automation"?: string | null
+          employee_id: number
+          soc_code?: number | null
         }
         Update: {
-          occupation_id?: number
-          occupation_name?: string | null
-          "Probability of automation"?: string | null
+          employee_id?: number
+          soc_code?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "Employee_Profile_soc_code_fkey"
+            columns: ["soc_code"]
+            isOneToOne: false
+            referencedRelation: "Job_Risk"
+            referencedColumns: ["soc_code"]
+          },
+        ]
       }
-      WorkforceReskilling_Caes: {
+      Employee_Reskilling_cases_with_trainning_effectiveness: {
         Row: {
           case_id: number
           certification_earned: boolean | null
           completion_date: string | null
           employee_id: number | null
+          perceived_skill_improvement: number | null
           start_date: string | null
+          training_feedback_score: number | null
           training_program: string | null
         }
         Insert: {
@@ -41,7 +48,9 @@ export type Database = {
           certification_earned?: boolean | null
           completion_date?: string | null
           employee_id?: number | null
+          perceived_skill_improvement?: number | null
           start_date?: string | null
+          training_feedback_score?: number | null
           training_program?: string | null
         }
         Update: {
@@ -49,8 +58,36 @@ export type Database = {
           certification_earned?: boolean | null
           completion_date?: string | null
           employee_id?: number | null
+          perceived_skill_improvement?: number | null
           start_date?: string | null
+          training_feedback_score?: number | null
           training_program?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Employee_Reskilling_cases_with_trainning_effec_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "Employee_Profile"
+            referencedColumns: ["employee_id"]
+          },
+        ]
+      }
+      Job_Risk: {
+        Row: {
+          automation_probability: number | null
+          job_title: string | null
+          soc_code: number
+        }
+        Insert: {
+          automation_probability?: number | null
+          job_title?: string | null
+          soc_code: number
+        }
+        Update: {
+          automation_probability?: number | null
+          job_title?: string | null
+          soc_code?: number
         }
         Relationships: []
       }
@@ -90,7 +127,7 @@ export type Database = {
             foreignKeyName: "WorkforceReskilling_events_case_id_fkey"
             columns: ["case_id"]
             isOneToOne: false
-            referencedRelation: "WorkforceReskilling_Caes"
+            referencedRelation: "Employee_Reskilling_cases_with_trainning_effectiveness"
             referencedColumns: ["case_id"]
           },
         ]

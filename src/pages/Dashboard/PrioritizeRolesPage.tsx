@@ -10,17 +10,36 @@ import {
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { fetchAutomationRiskData, fetchCasesWithEvents } from "@/services/supabaseService";
-import { Users, ArrowUpRight } from "lucide-react";
+import { Users, ArrowUpRight, RefreshCw } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 const PrioritizeRolesPage = () => {
-  const { data: occupations = [] } = useQuery({
+  const { toast } = useToast();
+  
+  const { 
+    data: occupations = [],
+    isLoading: isLoadingOccupations,
+    refetch: refetchOccupations 
+  } = useQuery({
     queryKey: ["automationRisk"],
     queryFn: fetchAutomationRiskData,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity
   });
   
-  const { data: casesWithEvents = [] } = useQuery({
+  const { 
+    data: casesWithEvents = [],
+    isLoading: isLoadingCases,
+    refetch: refetchCases
+  } = useQuery({
     queryKey: ["trainingWithEvents"],
     queryFn: fetchCasesWithEvents,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity
   });
   
   // Prepare data for prioritization matrix
@@ -52,24 +71,24 @@ const PrioritizeRolesPage = () => {
     
     // Get roles with automation risk data and calculate priority scores
     return occupations
-      .filter(occ => occ["Probability of automation"]) // Filter out nulls
+      .filter(occ => occ.automation_probability) // Filter out nulls
       .map((occ) => {
-        const automationRisk = parseFloat(occ["Probability of automation"] || "0");
-        const reskillingEase = simulateReskillingEase(occ.occupation_id);
+        const automationRisk = parseFloat(String(occ.automation_probability || "0"));
+        const reskillingEase = simulateReskillingEase(occ.soc_code);
         
         // Calculate priority score - higher for roles with high risk and ease of reskilling
         const priorityScore = (automationRisk * 0.6) + (reskillingEase * 0.4);
         
         return {
-          id: occ.occupation_id,
-          name: occ.occupation_name || `Occupation ${occ.occupation_id}`,
-          automationRisk,
+          id: occ.soc_code,
+          name: occ.job_title || `Occupation ${occ.soc_code}`,
+          automationRisk: automationRisk * 100,
           reskillingEase,
           priorityScore,
-          quadrant: automationRisk > 50 && reskillingEase > 50 ? 'High Priority' :
-                   automationRisk > 50 && reskillingEase <= 50 ? 'Medium Priority' :
-                   automationRisk <= 50 && reskillingEase > 50 ? 'Low Priority' :
-                   'Lowest Priority'
+          quadrant: automationRisk > 0.5 && reskillingEase > 50 ? 'High Priority' :
+                  automationRisk > 0.5 && reskillingEase <= 50 ? 'Medium Priority' :
+                  automationRisk <= 0.5 && reskillingEase > 50 ? 'Low Priority' :
+                  'Lowest Priority'
         };
       })
       .sort((a, b) => b.priorityScore - a.priorityScore);
@@ -133,12 +152,54 @@ const PrioritizeRolesPage = () => {
       theme: { light: "#6b7280", dark: "#9e9e9e" },
     },
   };
+
+  const handleRefresh = async () => {
+    try {
+      toast({
+        title: "Refreshing data...",
+        description: "Fetching the latest data"
+      });
+      
+      await Promise.all([refetchOccupations(), refetchCases()]);
+      
+      toast({
+        title: "Data refreshed",
+        description: "Prioritization dashboard now shows the latest data"
+      });
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+      toast({
+        title: "Refresh failed",
+        description: "There was an error refreshing the data",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const isLoading = isLoadingOccupations || isLoadingCases;
+  
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-full">Loading prioritization data...</div>;
+  }
   
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Users className="h-6 w-6 text-purple-500" />
-        <h1 className="text-2xl font-bold">Prioritize Roles for Reskilling</h1>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Users className="h-6 w-6 text-purple-500" />
+          <h1 className="text-2xl font-bold">Prioritize Roles for Reskilling</h1>
+        </div>
+        
+        <Button 
+          onClick={handleRefresh} 
+          variant="outline"
+          size="sm"
+          disabled={isLoading}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Refresh Data
+        </Button>
       </div>
       
       <Card>

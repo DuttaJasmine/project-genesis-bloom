@@ -31,10 +31,10 @@ const AutomationRiskPage = () => {
     if (!occupations.length) return [];
     
     return occupations
-      .filter(occ => occ.automation_probability) // Filter out nulls
+      .filter(occ => occ.automation_probability !== null) // Filter out nulls
       .map(occ => ({
         name: occ.job_title || `Occupation ${occ.soc_code}`,
-        risk: parseFloat(occ.automation_probability || "0") * 100, // Convert to percentage
+        risk: parseFloat(String(occ.automation_probability || "0")) * 100, // Convert to percentage
         id: occ.soc_code,
       }))
       .sort((a, b) => b.risk - a.risk)
@@ -167,7 +167,7 @@ const AutomationRiskPage = () => {
             </TableHeader>
             <TableBody>
               {occupations.slice(0, 20).map((occ) => {
-                const riskScore = parseFloat(occ.automation_probability || "0") * 100; // Convert to percentage
+                const riskScore = parseFloat(String(occ.automation_probability || "0")) * 100; // Convert to percentage
                 let riskLevel = "Low";
                 if (riskScore > 70) riskLevel = "High";
                 else if (riskScore > 40) riskLevel = "Medium";

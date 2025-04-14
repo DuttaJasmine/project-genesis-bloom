@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,7 @@ const ReskillingSuccessPage = () => {
   const { 
     data: casesWithEvents = [], 
     isLoading,
+    isRefetching,
     refetch 
   } = useQuery({
     queryKey: ["trainingWithEvents"],
@@ -158,11 +160,11 @@ const ReskillingSuccessPage = () => {
           onClick={handleRefresh} 
           variant="outline"
           size="sm"
-          disabled={isLoading}
+          disabled={isLoading || isRefetching}
           className="flex items-center gap-2"
         >
-          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          Refresh Data
+          <RefreshCw className={`h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
+          {isRefetching ? "Refreshing..." : "Refresh Data"}
         </Button>
       </div>
       

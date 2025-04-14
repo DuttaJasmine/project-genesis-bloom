@@ -19,7 +19,7 @@ export async function fetchAutomationRiskData() {
 // Fetch training cases
 export async function fetchTrainingCases() {
   const { data, error } = await supabase
-    .from("Employee_Reskilling_cases_with_trainning_effectiveness")
+    .from("Employee_Reskilling_cases")
     .select("*");
   
   if (error) {

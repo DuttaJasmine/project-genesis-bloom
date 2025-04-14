@@ -32,7 +32,7 @@ export type Database = {
           },
         ]
       }
-      Employee_Reskilling_cases_with_trainning_effectiveness: {
+      Employee_Reskilling_cases: {
         Row: {
           case_id: number
           certification_earned: boolean | null
@@ -127,7 +127,7 @@ export type Database = {
             foreignKeyName: "WorkforceReskilling_events_case_id_fkey"
             columns: ["case_id"]
             isOneToOne: false
-            referencedRelation: "Employee_Reskilling_cases_with_trainning_effectiveness"
+            referencedRelation: "Employee_Reskilling_cases"
             referencedColumns: ["case_id"]
           },
         ]

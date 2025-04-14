@@ -6,10 +6,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { PieChart, Pie, ResponsiveContainer, Cell, Legend } from "recharts";
 import { fetchCasesWithEvents } from "@/services/supabaseService";
-import { ChartBar, CheckCircle, XCircle } from "lucide-react";
+import { ChartBar, CheckCircle, XCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const TrainingEffectivenessPage = () => {
-  const { data: casesWithEvents = [], isLoading } = useQuery({
+  const { data: casesWithEvents = [], isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["trainingWithEvents"],
     queryFn: fetchCasesWithEvents,
   });
@@ -73,6 +74,10 @@ const TrainingEffectivenessPage = () => {
     };
   }, [casesWithEvents]);
 
+  const handleRefresh = () => {
+    refetch();
+  };
+
   if (isLoading) {
     return <div className="flex justify-center items-center h-full">Loading training data...</div>;
   }
@@ -112,9 +117,21 @@ const TrainingEffectivenessPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <ChartBar className="h-6 w-6 text-blue-500" />
-        <h1 className="text-2xl font-bold">Training Program Effectiveness</h1>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <ChartBar className="h-6 w-6 text-blue-500" />
+          <h1 className="text-2xl font-bold">Training Program Effectiveness</h1>
+        </div>
+        <Button 
+          onClick={handleRefresh} 
+          variant="outline" 
+          size="sm"
+          disabled={isRefetching}
+          className="flex items-center gap-1"
+        >
+          <RefreshCw className={`h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
+          {isRefetching ? 'Refreshing...' : 'Refresh Data'}
+        </Button>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
